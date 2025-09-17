@@ -44,17 +44,6 @@ uv sync
 
 ## Configuration
 
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-TIKTOK_APP_ID=your_app_id
-TIKTOK_APP_SECRET=your_app_secret
-TIKTOK_ACCESS_TOKEN=your_access_token
-TIKTOK_ADVERTISER_ID=your_advertiser_id
-```
-
 ### MCP Client Configuration
 
 Add to your MCP client configuration (e.g., Claude Desktop):
@@ -65,11 +54,10 @@ Add to your MCP client configuration (e.g., Claude Desktop):
     "tiktok-ads": {
       "command": "python",
       "args": ["/path/to/adsmcp-server/run_server.py"],
+      "cwd": "/path/to/adsmcp-server",
       "env": {
         "TIKTOK_APP_ID": "your_app_id",
         "TIKTOK_APP_SECRET": "your_app_secret",
-        "TIKTOK_ACCESS_TOKEN": "your_access_token",
-        "TIKTOK_ADVERTISER_ID": "your_advertiser_id"
       }
     }
   }
@@ -112,11 +100,6 @@ Add to your MCP client configuration (e.g., Claude Desktop):
    - Handle token refresh automatically
    - Store tokens securely
 
-### Development vs Production
-
-- **Development**: Use long-lived access tokens
-- **Production**: Implement full OAuth flow with refresh tokens
-
 ## Security Best Practices
 
 - Never commit API credentials to version control
@@ -141,41 +124,6 @@ The server provides comprehensive error handling:
 - Token expiration handling
 - Network connectivity issues
 - Invalid parameter validation
-
-## Development
-
-### Running Tests
-
-```bash
-# Install dev dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest
-
-# Run with coverage
-pytest --cov=tiktok_ads_mcp
-```
-
-### Code Formatting
-
-```bash
-# Format code
-black .
-isort .
-
-# Type checking
-mypy .
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
 
 ## License
 

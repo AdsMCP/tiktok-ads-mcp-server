@@ -79,19 +79,19 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 ## Available Tools
 
 ### Authentication
-- `tiktok_login` - Start TikTok Ads OAuth authentication flow
-- `tiktok_complete_auth` - Complete OAuth authentication with authorization code
-- `tiktok_auth_status` - Check current authentication status
-- `switch_ad_account` - Switch to a different advertiser account
+- `tiktok_ads_login` - Start TikTok Ads OAuth authentication flow
+- `tiktok_ads_complete_auth` - Complete OAuth authentication with authorization code
+- `tiktok_ads_auth_status` - Check current authentication status
+- `tiktok_ads_switch_ad_account` - Switch to a different advertiser account
 
 ### Campaign Management
-- `get_campaigns` - Retrieve all campaigns for the advertiser account
-- `get_campaign_details` - Get detailed information about a specific campaign
-- `get_adgroups` - Retrieve ad groups for a campaign
+- `tiktok_ads_get_campaigns` - Retrieve all campaigns for the advertiser account
+- `tiktok_ads_get_campaign_details` - Get detailed information about a specific campaign
+- `tiktok_ads_get_adgroups` - Retrieve ad groups for a campaign
 
 ### Performance & Analytics
-- `get_campaign_performance` - Get performance metrics for campaigns with detailed metrics support
-- `get_adgroup_performance` - Get performance metrics for ad groups with breakdowns
+- `tiktok_ads_get_campaign_performance` - Get performance metrics for campaigns with detailed metrics support
+- `tiktok_ads_get_adgroup_performance` - Get performance metrics for ad groups with breakdowns
 
 ## Authentication
 

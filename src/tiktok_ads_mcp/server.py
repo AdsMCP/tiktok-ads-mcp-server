@@ -84,7 +84,7 @@ class TikTokMCPServer:
                 logger.info("Using direct token authentication...")
                 await self._authenticate_with_tokens(access_token, advertiser_id, available_advertiser_ids)
             else:
-                logger.info("OAuth credentials configured. Use the 'tiktok_login' tool to authenticate.")
+                logger.info("OAuth credentials configured. Use the 'tiktok_ads_login' tool to authenticate.")
             
             logger.info("TikTok Ads MCP Server initialized successfully")
             
@@ -213,7 +213,7 @@ class TikTokMCPServer:
                     'data': {
                         'status': 'not_authenticated',
                         'app_id': self.app_id,
-                        'message': 'No saved tokens found. Please use tiktok_login tool to authenticate.'
+                        'message': 'No saved tokens found. Please use tiktok_ads_login tool to authenticate.'
                     }
                 }
     
@@ -263,7 +263,7 @@ async def list_tools() -> List[Tool]:
     # Authentication tools (always available)
     tools.extend([
         Tool(
-            name="tiktok_login",
+            name="tiktok_ads_login",
             description="Start TikTok Ads OAuth authentication flow",
             inputSchema={
                 "type": "object",
@@ -277,7 +277,7 @@ async def list_tools() -> List[Tool]:
             }
         ),
         Tool(
-            name="tiktok_complete_auth",
+            name="tiktok_ads_complete_auth",
             description="Complete OAuth authentication with authorization code",
             inputSchema={
                 "type": "object",
@@ -292,7 +292,7 @@ async def list_tools() -> List[Tool]:
             }
         ),
         Tool(
-            name="tiktok_auth_status",
+            name="tiktok_ads_auth_status",
             description="Check current authentication status with TikTok Ads API",
             inputSchema={
                 "type": "object",
@@ -301,7 +301,7 @@ async def list_tools() -> List[Tool]:
             }
         ),
         Tool(
-            name="switch_ad_account",
+            name="tiktok_ads_switch_ad_account",
             description="Switch to a different advertiser account, DO NOT try to switch advertiser account automatically, only if user ask to switch",
             inputSchema={
                 "type": "object",
@@ -320,7 +320,7 @@ async def list_tools() -> List[Tool]:
     # Campaign management tools
     tools.extend([
         Tool(
-            name="get_campaigns",
+            name="tiktok_ads_get_campaigns",
             description="Retrieve all campaigns for the advertiser account",
             inputSchema={
                 "type": "object",
@@ -339,7 +339,7 @@ async def list_tools() -> List[Tool]:
             }
         ),
         Tool(
-            name="get_campaign_details",
+            name="tiktok_ads_get_campaign_details",
             description="Get detailed information about a specific campaign",
             inputSchema={
                 "type": "object",
@@ -353,7 +353,7 @@ async def list_tools() -> List[Tool]:
             }
         ),
         Tool(
-            name="get_adgroups",
+            name="tiktok_ads_get_adgroups",
             description="Retrieve ad groups for a campaign",
             inputSchema={
                 "type": "object",
@@ -376,7 +376,7 @@ async def list_tools() -> List[Tool]:
     # Performance analytics tools
     tools.extend([
         Tool(
-            name="get_campaign_performance",
+            name="tiktok_ads_get_campaign_performance",
             description="Get performance metrics for campaigns",
             inputSchema={
                 "type": "object",
@@ -484,7 +484,7 @@ secondary_goal_result_rate	string	Deep funnel result rate	Percentage of deep fun
             }
         ),
         Tool(
-            name="get_adgroup_performance",
+            name="tiktok_ads_get_adgroup_performance",
             description="Get performance metrics for ad groups",
             inputSchema={
                 "type": "object",
@@ -520,18 +520,18 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
         result = None
         
         # Authentication tools (always available)
-        if name == "tiktok_login":
+        if name == "tiktok_ads_login":
             force_reauth = arguments.get("force_reauth")
             result =  await tiktok_server.start_oauth_flow(force_reauth=force_reauth)
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
-        elif name == "tiktok_complete_auth":
+        elif name == "tiktok_ads_complete_auth":
             auth_code = arguments.get("auth_code")
             result = await tiktok_server.complete_oauth(auth_code)
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
-        elif name == "tiktok_auth_status":
+        elif name == "tiktok_ads_auth_status":
             result =  await tiktok_server.get_auth_status()
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
-        elif name == "switch_ad_account":
+        elif name == "tiktok_ads_switch_ad_account":
             advertiser_id = arguments.get("advertiser_id")
             result = await tiktok_server.switch_ad_account(advertiser_id)
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
@@ -540,41 +540,41 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
         if not tiktok_server.client or not tiktok_server.is_authenticated:
             return [TextContent(
                 type="text",
-                text="Error: Not authenticated with TikTok Ads API. Please use the 'tiktok_login' tool first." + str(tiktok_server.client) + str(tiktok_server.is_authenticated)
+                text="Error: Not authenticated with TikTok Ads API. Please use the 'tiktok_ads_login' tool first." + str(tiktok_server.client) + str(tiktok_server.is_authenticated)
             )]
         
         # Campaign management tools
-        if name == "get_campaigns":
+        if name == "tiktok_ads_get_campaigns":
             result = await tiktok_server.campaign_tools.get_campaigns(**arguments)
-        elif name == "get_campaign_details":
+        elif name == "tiktok_ads_get_campaign_details":
             result = await tiktok_server.campaign_tools.get_campaign_details(**arguments)
-        elif name == "create_campaign":
+        elif name == "tiktok_ads_create_campaign":
             result = await tiktok_server.campaign_tools.create_campaign(**arguments)
-        elif name == "get_adgroups":
+        elif name == "tiktok_ads_get_adgroups":
             result = await tiktok_server.campaign_tools.get_adgroups(**arguments)
-        elif name == "create_adgroup":
+        elif name == "tiktok_ads_create_adgroup":
             result = await tiktok_server.campaign_tools.create_adgroup(**arguments)
             
         # Performance tools
-        elif name == "get_campaign_performance":
+        elif name == "tiktok_ads_get_campaign_performance":
             result = await tiktok_server.performance_tools.get_campaign_performance(**arguments)
-        elif name == "get_adgroup_performance":
+        elif name == "tiktok_ads_get_adgroup_performance":
             result = await tiktok_server.performance_tools.get_adgroup_performance(**arguments)
             
         # Creative tools
-        elif name == "get_ad_creatives":
+        elif name == "tiktok_ads_get_ad_creatives":
             result = await tiktok_server.creative_tools.get_ad_creatives(**arguments)
-        elif name == "upload_image":
+        elif name == "tiktok_ads_upload_image":
             result = await tiktok_server.creative_tools.upload_image(**arguments)
             
         # Audience tools
-        elif name == "get_custom_audiences":
+        elif name == "tiktok_ads_get_custom_audiences":
             result = await tiktok_server.audience_tools.get_custom_audiences(**arguments)
-        elif name == "get_targeting_options":
+        elif name == "tiktok_ads_get_targeting_options":
             result = await tiktok_server.audience_tools.get_targeting_options(**arguments)
             
         # Reporting tools
-        elif name == "generate_report":
+        elif name == "tiktok_ads_generate_report":
             result = await tiktok_server.reporting_tools.generate_report(**arguments)
             
         else:

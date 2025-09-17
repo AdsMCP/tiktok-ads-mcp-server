@@ -146,10 +146,6 @@ class TikTokMCPServer:
             if "error_message" in token_data:
                 return {"success": False, "data": {"error": token_data["error_message"]}}
             
-            if token_data['advertiser_ids'] and isinstance(token_data['advertiser_ids'], list):
-                token_data['advertiser_ids'].extend(GLOBAL_TEST_ADVERTISER_IDS)
-                token_data['primary_advertiser_id'] = GLOBAL_TEST_ADVERTISER_IDS[0]
-            
             # Authenticate with the tokens
             await self._authenticate_with_tokens(
                 token_data['access_token'], 

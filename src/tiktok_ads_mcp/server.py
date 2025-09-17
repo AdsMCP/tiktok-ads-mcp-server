@@ -323,7 +323,7 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "status": {
                         "type": "string",
-                        "enum": ["ENABLE", "DISABLE", "DELETE"],
+                        "enum": ['STATUS_ALL', 'STATUS_NOT_DELETE', 'STATUS_NOT_DELIVERY', 'STATUS_DELIVERY_OK', 'STATUS_DISABLE', 'STATUS_DELETE'],
                         "description": "Filter campaigns by status"
                     },
                     "limit": {
@@ -360,7 +360,7 @@ async def list_tools() -> List[Tool]:
                     },
                     "status": {
                         "type": "string",
-                        "enum": ["ENABLE", "DISABLE", "DELETE"],
+                        "enum": ['STATUS_ALL', 'STATUS_NOT_DELETE', 'STATUS_NOT_DELIVERY', 'STATUS_DELIVERY_OK', 'STATUS_DISABLE', 'STATUS_DELETE'],
                         "description": "Filter ad groups by status"
                     }
                 },

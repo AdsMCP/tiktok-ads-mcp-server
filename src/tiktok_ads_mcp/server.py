@@ -57,6 +57,7 @@ class TikTokMCPServer:
         self.primary_advertiser_id: Optional[str] = None
         self.available_advertiser_ids: List[str] = []
         self.oauth_client: Optional[SimpleTikTokOAuth] = None
+        self.read_only_mode: bool = False
         
     async def initialize(self):
         """Initialize the TikTok Ads MCP Server with credentials check."""
@@ -64,6 +65,12 @@ class TikTokMCPServer:
             # Store app credentials for OAuth login
             self.app_id = os.getenv("TIKTOK_APP_ID")
             self.app_secret = os.getenv("TIKTOK_APP_SECRET")
+            self.read_only_mode = os.getenv("TIKTOK_READ_ONLY_MODE", "false").lower() in {
+                "1",
+                "true",
+                "yes",
+                "on",
+            }
             access_token = os.getenv("TIKTOK_ACCESS_TOKEN")
             advertiser_id = os.getenv("TIKTOK_ADVERTISER_ID")
             available_advertiser_ids = os.getenv("TIKTOK_AVAILABLE_ADVERTISER_IDS", "")
@@ -85,6 +92,11 @@ class TikTokMCPServer:
                 await self._authenticate_with_tokens(access_token, advertiser_id, available_advertiser_ids)
             else:
                 logger.info("OAuth credentials configured. Use the 'tiktok_ads_login' tool to authenticate.")
+
+            if self.read_only_mode:
+                logger.info(
+                    "TikTok Ads MCP server is running in read-only mode; write tools are disabled."
+                )
             
             logger.info("TikTok Ads MCP Server initialized successfully")
             
@@ -537,6 +549,20 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
             return [TextContent(
                 type="text",
                 text="Error: Not authenticated with TikTok Ads API. Please use the 'tiktok_ads_login' tool first." + str(tiktok_server.client) + str(tiktok_server.is_authenticated)
+            )]
+
+        write_tool_names = {
+            "tiktok_ads_create_campaign",
+            "tiktok_ads_create_adgroup",
+            "tiktok_ads_upload_image",
+        }
+        if tiktok_server.read_only_mode and name in write_tool_names:
+            return [TextContent(
+                type="text",
+                text=(
+                    "Error: This MCP server is configured for read-only access "
+                    f"(TIKTOK_READ_ONLY_MODE=true). Tool '{name}' is disabled."
+                ),
             )]
         
         # Campaign management tools

@@ -104,6 +104,73 @@ Add to your MCP client configuration (e.g., Claude Desktop):
    - Handle token refresh automatically
    - Store tokens securely
 
+
+## Enterprise Read-Only Workspace Setup
+
+For enterprise GPT use cases (for example, a shared marketing analytics GPT), run this MCP server in **read-only mode** so users can only fetch TikTok Ads data.
+
+1. Configure credentials and read-only flag:
+
+```bash
+export TIKTOK_APP_ID="your_app_id"
+export TIKTOK_APP_SECRET="your_app_secret"
+export TIKTOK_READ_ONLY_MODE=true
+```
+
+2. Start the server and authenticate with `tiktok_ads_login` / `tiktok_ads_complete_auth`.
+3. Use analytics tools such as:
+   - `tiktok_ads_get_campaign_performance`
+   - `tiktok_ads_get_adgroup_performance`
+   - `tiktok_ads_get_campaigns`
+
+When `TIKTOK_READ_ONLY_MODE=true`, write operations are blocked by the server (`create_campaign`, `create_adgroup`, `upload_image`) and return a clear error message.
+
+### Configure this as a connector for ChatGPT Enterprise (admin flow)
+
+Use this checklist to make the integration usable for your marketing-team GPT (for example, *Croc Cruncher*):
+
+1. **Host the MCP server in your controlled environment**
+   - Deploy this repo on an internal VM/container or managed service you control.
+   - Keep secrets in your enterprise secret manager (not in code).
+   - Set:
+
+```bash
+TIKTOK_APP_ID="..."
+TIKTOK_APP_SECRET="..."
+TIKTOK_READ_ONLY_MODE=true
+```
+
+2. **Verify server startup before connecting ChatGPT**
+   - Start with `python run_server.py` (or your process manager).
+   - Confirm auth status with `tiktok_ads_auth_status`.
+   - Complete OAuth once via `tiktok_ads_login` and `tiktok_ads_complete_auth`.
+
+3. **Add the MCP server in your ChatGPT Enterprise admin/workspace settings**
+   - Go to your workspace admin area for integrations/connectors/tools.
+   - Add a new MCP server connection pointing to this service.
+   - Scope access to the intended group (for example: Marketing Analytics).
+
+4. **Create or update the internal GPT**
+   - In GPT configuration, enable this TikTok MCP connector for the GPT.
+   - In instructions, enforce analytics-only behavior (example below).
+
+```text
+Use TikTok tools in read-only mode for analytics and forecasting only.
+Do not attempt campaign/adgroup creation or creative uploads.
+If a write task is requested, explain that this GPT has read-only connector access.
+```
+
+5. **Limit data and behavior intentionally**
+   - Allow only users who need campaign reporting access.
+   - Prefer performance/reporting tools for spend, ROAS, CTR, conversion analysis.
+   - Keep advertiser account switching manual (`tiktok_ads_switch_ad_account`) for governance.
+
+6. **Validate with a real query in ChatGPT**
+   - Example: “Show last 30 days spend, CTR, conversions, and ROAS by campaign.”
+   - Confirm that read tools return data and write tools are rejected with read-only error messaging.
+
+> **Note:** Exact menu names in ChatGPT Enterprise may vary as OpenAI updates admin UX. The key requirement is: attach this MCP server as a workspace-managed tool/connector and restrict GPT access to approved users.
+
 ## Security Best Practices
 
 - Never commit API credentials to version control

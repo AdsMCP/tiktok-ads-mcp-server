@@ -13,6 +13,10 @@ This project is part of the [AdsMCP AI advertising automation platform](https://
 - **Creative Management**: Upload and manage ad creatives
 - **Reporting**: Generate and download custom performance reports
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/adsmcp-tiktok-ads-mcp-server).
+
 ## Installation
 
 ### Prerequisites

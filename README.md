@@ -2,7 +2,7 @@
 
 A Model Context Protocol (MCP) server for TikTok Ads API integration. This server enables AI assistants like Claude to interact with TikTok advertising campaigns, providing comprehensive campaign management, analytics, and optimization capabilities.
 
-This project is part of the [AdsMCP AI advertising automation platform](https://adsmcp.com), an AI-powered platform designed to simplify and automate ad campaign management across multiple advertising networks. The platform emphasizes efficiency, data-driven insights, and intelligent automation for marketers and agencies. Additionally, AdsMCP also supports integration with other advertising platforms, such as **Google Ads** and **Meta (Facebook) Ads**, making it easier to manage campaigns across multiple networks from a single interface. 
+This project is part of the [AdsMCP AI advertising automation platform](https://adsmcp.com), an AI-powered platform designed to simplify and automate ad campaign management across multiple advertising networks. The platform emphasizes efficiency, data-driven insights, and intelligent automation for marketers and agencies. Additionally, AdsMCP also supports integration with other platforms, such as **Shopify** and **GA4**, making it easier to manage campaigns across multiple funnels. 
 
 
 ## Features

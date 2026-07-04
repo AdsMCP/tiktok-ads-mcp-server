@@ -1,7 +1,5 @@
 """Campaign management tools for TikTok Ads MCP server."""
 
-import json
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from ..tiktok_client import TikTokAdsClient
@@ -12,7 +10,56 @@ class CampaignTools:
     
     def __init__(self, client: TikTokAdsClient):
         self.client = client
-    
+
+    @staticmethod
+    def _list_response(
+        entity_type: str,
+        items: List[Dict[str, Any]],
+        total_count: int,
+        message: str,
+        **extra: Any,
+    ) -> Dict[str, Any]:
+        return {
+            "success": True,
+            "data": {
+                "entity_type": entity_type,
+                "items": items,
+                "total_count": total_count,
+                "message": message,
+                **extra,
+            },
+        }
+
+    @staticmethod
+    def _detail_response(
+        entity_type: str,
+        item_id_key: str,
+        item_id: str,
+        item: Optional[Dict[str, Any]],
+        message: str,
+    ) -> Dict[str, Any]:
+        if item is None:
+            return {
+                "success": False,
+                "data": {
+                    "entity_type": entity_type,
+                    item_id_key: item_id,
+                    "item": None,
+                    "not_found": True,
+                    "error": f"{entity_type.replace('_', ' ').title()} not found",
+                },
+            }
+
+        return {
+            "success": True,
+            "data": {
+                "entity_type": entity_type,
+                item_id_key: item_id,
+                "item": item,
+                "message": message,
+            },
+        }
+
     async def get_campaigns(
         self,
         status: Optional[str] = None,
@@ -29,40 +76,23 @@ class CampaignTools:
         """
         try:
             result = await self.client.get_campaigns(status=status, limit=limit)
-            
             campaigns = result.get("data", {}).get("list", [])
-            
-            # Format response for better readability
-            formatted_campaigns = []
-            for campaign in campaigns:
-                formatted_campaign = {
-                    "campaign_id": campaign.get("campaign_id"),
-                    "campaign_name": campaign.get("campaign_name"),
-                    "objective_type": campaign.get("objective_type"),
-                    "status": campaign.get("primary_status"),
-                    "budget": campaign.get("budget"),
-                    "budget_mode": campaign.get("budget_mode"),
-                    "create_time": campaign.get("create_time"),
-                    "modify_time": campaign.get("modify_time"),
-                }
-                formatted_campaigns.append(formatted_campaign)
-            
-            return {
-                "success": True,
-                "data": {
-                    "campaigns": formatted_campaigns,
-                    "total_count": result.get("data", {}).get("page_info", {}).get("total_number", 0),
-                    "message": f"Retrieved {len(formatted_campaigns)} campaigns"
-                }
-            }
+
+            return self._list_response(
+                entity_type="campaign",
+                items=campaigns,
+                total_count=result.get("data", {}).get("page_info", {}).get("total_number", 0),
+                message=f"Retrieved {len(campaigns)} campaigns",
+            )
             
         except Exception as e:
             return {
                 "success": False,
                 "data": {
+                    "entity_type": "campaign",
                     "error": str(e),
-                    "message": "Failed to retrieve campaigns"
-                }
+                    "message": "Failed to retrieve campaigns",
+                },
             }
     
     async def get_campaign_details(self, campaign_id: str) -> Dict[str, Any]:
@@ -76,58 +106,26 @@ class CampaignTools:
         """
         try:
             result = await self.client.get_campaign_details(campaign_id)
-            
             campaigns = result.get("data", {}).get("list", [])
-            if not campaigns:
-                return {
-                    "success": False,
-                    "data": {
-                        "error": "Campaign not found",
-                        "campaign_id": campaign_id
-                    }
-                }
-            
-            campaign = campaigns[0]
-            
-            # Format detailed campaign info
-            campaign_details = {
-                "campaign_id": campaign.get("campaign_id"),
-                "campaign_name": campaign.get("campaign_name"),
-                "advertiser_id": campaign.get("advertiser_id"),
-                "objective_type": campaign.get("objective_type"),
-                "status": {
-                    "primary_status": campaign.get("primary_status"),
-                    "secondary_status": campaign.get("secondary_status"),
-                },
-                "budget_info": {
-                    "budget": campaign.get("budget"),
-                    "budget_mode": campaign.get("budget_mode"),
-                    "spent_budget": campaign.get("spent_budget", 0),
-                },
-                "schedule": {
-                    "schedule_type": campaign.get("schedule_type"),
-                    "schedule_start_time": campaign.get("schedule_start_time"),
-                    "schedule_end_time": campaign.get("schedule_end_time"),
-                },
-                "special_industries": campaign.get("special_industries", []),
-                "create_time": campaign.get("create_time"),
-                "modify_time": campaign.get("modify_time"),
-            }
-            
-            return {
-                "success": True,
-                "data": {
-                    "campaign": campaign_details,
-                    "message": f"Retrieved details for campaign {campaign_id}"
-                }
-            }
+            campaign = campaigns[0] if campaigns else None
+
+            return self._detail_response(
+                entity_type="campaign",
+                item_id_key="campaign_id",
+                item_id=campaign_id,
+                item=campaign,
+                message=f"Retrieved details for campaign {campaign_id}",
+            )
             
         except Exception as e:
             return {
                 "success": False,
-                "error": str(e),
-                "campaign_id": campaign_id,
-                "message": "Failed to retrieve campaign details"
+                "data": {
+                    "entity_type": "campaign",
+                    "campaign_id": campaign_id,
+                    "error": str(e),
+                    "message": "Failed to retrieve campaign details",
+                },
             }
     
     async def create_campaign(
@@ -203,40 +201,114 @@ class CampaignTools:
                 status=status,
                 limit=limit
             )
-            
             adgroups = result.get("data", {}).get("list", [])
-            
-            # Format ad groups for better readability
-            formatted_adgroups = []
-            for adgroup in adgroups:
-                formatted_adgroup = {
-                    "adgroup_id": adgroup.get("adgroup_id"),
-                    "adgroup_name": adgroup.get("adgroup_name"),
-                    "campaign_id": adgroup.get("campaign_id"),
-                    "status": adgroup.get("primary_status"),
-                    "placement_type": adgroup.get("placement_type"),
-                    "budget": adgroup.get("budget"),
-                    "bid_type": adgroup.get("bid_type"),
-                    "optimization_goal": adgroup.get("optimization_goal"),
-                    "create_time": adgroup.get("create_time"),
-                    "modify_time": adgroup.get("modify_time"),
-                }
-                formatted_adgroups.append(formatted_adgroup)
-            
-            return {
-                "success": True,
-                "campaign_id": campaign_id,
-                "adgroups": formatted_adgroups,
-                "total_count": result.get("data", {}).get("page_info", {}).get("total_number", 0),
-                "message": f"Retrieved {len(formatted_adgroups)} ad groups for campaign {campaign_id}"
-            }
+
+            return self._list_response(
+                entity_type="adgroup",
+                items=adgroups,
+                total_count=result.get("data", {}).get("page_info", {}).get("total_number", 0),
+                message=f"Retrieved {len(adgroups)} ad groups for campaign {campaign_id}",
+                campaign_id=campaign_id,
+            )
             
         except Exception as e:
             return {
                 "success": False,
-                "error": str(e),
-                "campaign_id": campaign_id,
-                "message": "Failed to retrieve ad groups"
+                "data": {
+                    "entity_type": "adgroup",
+                    "campaign_id": campaign_id,
+                    "error": str(e),
+                    "message": "Failed to retrieve ad groups",
+                },
+            }
+
+    async def get_adgroup_details(self, adgroup_id: str) -> Dict[str, Any]:
+        """Get detailed information about a specific ad group."""
+        try:
+            result = await self.client.get_adgroup_details(adgroup_id)
+            adgroups = result.get("data", {}).get("list", [])
+            adgroup = adgroups[0] if adgroups else None
+            return self._detail_response(
+                entity_type="adgroup",
+                item_id_key="adgroup_id",
+                item_id=adgroup_id,
+                item=adgroup,
+                message=f"Retrieved details for ad group {adgroup_id}",
+            )
+
+        except Exception as e:
+            return {
+                "success": False,
+                "data": {
+                    "entity_type": "adgroup",
+                    "adgroup_id": adgroup_id,
+                    "error": str(e),
+                    "message": "Failed to retrieve ad group details",
+                },
+            }
+
+    async def get_ads(
+        self,
+        campaign_ids: Optional[List[str]] = None,
+        adgroup_ids: Optional[List[str]] = None,
+        ad_ids: Optional[List[str]] = None,
+        status: Optional[str] = None,
+        limit: int = 10,
+    ) -> Dict[str, Any]:
+        """Get ads with optional campaign, ad group, ad ID, or status filters."""
+        try:
+            result = await self.client.get_ads(
+                campaign_ids=campaign_ids,
+                adgroup_ids=adgroup_ids,
+                ad_ids=ad_ids,
+                status=status,
+                limit=limit,
+            )
+            ads = result.get("data", {}).get("list", [])
+            return self._list_response(
+                entity_type="ad",
+                items=ads,
+                total_count=result.get("data", {}).get("page_info", {}).get("total_number", 0),
+                message=f"Retrieved {len(ads)} ads",
+                applied_filters={
+                    "campaign_ids": campaign_ids or [],
+                    "adgroup_ids": adgroup_ids or [],
+                    "ad_ids": ad_ids or [],
+                    "status": status,
+                },
+            )
+        except Exception as e:
+            return {
+                "success": False,
+                "data": {
+                    "entity_type": "ad",
+                    "error": str(e),
+                    "message": "Failed to retrieve ads",
+                },
+            }
+
+    async def get_ad_details(self, ad_id: str) -> Dict[str, Any]:
+        """Get detailed information about a specific ad."""
+        try:
+            result = await self.client.get_ad_details(ad_id)
+            ads = result.get("data", {}).get("list", [])
+            ad = ads[0] if ads else None
+            return self._detail_response(
+                entity_type="ad",
+                item_id_key="ad_id",
+                item_id=ad_id,
+                item=ad,
+                message=f"Retrieved details for ad {ad_id}",
+            )
+        except Exception as e:
+            return {
+                "success": False,
+                "data": {
+                    "entity_type": "ad",
+                    "ad_id": ad_id,
+                    "error": str(e),
+                    "message": "Failed to retrieve ad details",
+                },
             }
     
     async def create_adgroup(

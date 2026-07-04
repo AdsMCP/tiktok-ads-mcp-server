@@ -37,6 +37,9 @@ class PerformanceTools:
         elif date_range == "last_30_days":
             start_date = (today - timedelta(days=30)).strftime("%Y-%m-%d")
             end_date = (today - timedelta(days=1)).strftime("%Y-%m-%d")
+        elif date_range == "last_90_days":
+            start_date = (today - timedelta(days=90)).strftime("%Y-%m-%d")
+            end_date = (today - timedelta(days=1)).strftime("%Y-%m-%d")
         else:
             # Default to last 7 days
             start_date = (today - timedelta(days=7)).strftime("%Y-%m-%d")
@@ -173,4 +176,56 @@ class PerformanceTools:
                 "adgroup_ids": adgroup_ids,
                 "date_range": date_range,
                 "message": "Failed to retrieve ad group performance data"
+            }
+
+    async def get_ad_performance(
+        self,
+        ad_ids: List[str],
+        date_range: str = "last_7_days",
+        metrics: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """Get performance metrics for ads."""
+        try:
+            start_date, end_date = self._get_date_range(date_range)
+            dimensions = ["ad_id"]
+            common_metrics = ["campaign_id", "campaign_name", "adgroup_id", "adgroup_name", "ad_name"]
+            if not metrics:
+                metrics = [
+                    "impressions", "clicks", "conversion", "spend",
+                    "ctr", "cpm", "cpc", "conversion_rate_v2"
+                ]
+            else:
+                rewrite_metrics = {
+                    "conversions": "conversion"
+                }
+                metrics = [rewrite_metrics.get(m, m) for m in metrics]
+
+            result = await self.client.get_performance_data(
+                level="AUCTION_AD",
+                entity_ids=ad_ids,
+                metrics=common_metrics + metrics,
+                start_date=start_date,
+                end_date=end_date,
+                dimensions=dimensions,
+            )
+
+            performance_data = [item.get("metrics", {}) for item in result.get("data", {}).get("list", [])]
+            total_metrics = result.get("data", {}).get("total_metrics", {})
+
+            return {
+                "success": True,
+                "date_range": f"{start_date} to {end_date}",
+                "ads": performance_data,
+                "totals": total_metrics,
+                "ad_count": len(performance_data),
+                "message": f"Retrieved performance data for {len(performance_data)} ads"
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "ad_ids": ad_ids,
+                "date_range": date_range,
+                "message": "Failed to retrieve ad performance data"
             }

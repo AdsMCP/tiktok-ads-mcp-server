@@ -1,2 +1,6 @@
 *.pyc
+__pycache__/
 .env
+venv/
+**/token.json
+**/tokens.json

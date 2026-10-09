@@ -2,14 +2,6 @@
 
 A local Model Context Protocol (MCP) server for TikTok Ads API integration. It lets MCP clients such as Claude Desktop connect to TikTok Ads, authenticate with a TikTok Business app, and use read-only tools for campaign lookup, ad group and ad inspection, performance reporting, audience breakdowns, advertiser info, pixels, and targeting locations.
 
-## What This Server Does
-
-- **Authentication**: Start and complete TikTok Ads OAuth from an MCP client.
-- **Campaign lookup**: List campaigns, inspect campaign details, list ad groups, and inspect ads.
-- **Performance analytics**: Pull campaign, ad group, ad, and audience metrics for common date ranges.
-- **Audience and account data**: Retrieve custom audiences, advertiser info, location IDs, pixels, and pixel event stats.
-- **Read-only operation**: The public MCP tool registry does not expose campaign creation, ad group creation, creative upload, or other write operations.
-
 ## Hosted Option
 
 This repository is for users who want to run a local TikTok Ads MCP server.
@@ -19,6 +11,15 @@ If you do not want to install Python, manage dependencies, or configure a TikTok
 [AdsMCP Remote MCP Server Setup Guide](https://adsmcp.com/onboarding)
 
 The rest of this README covers the local setup.
+
+## What This Server Does
+
+- **Authentication**: Start and complete TikTok Ads OAuth from an MCP client.
+- **Campaign lookup**: List campaigns, inspect campaign details, list ad groups, and inspect ads.
+- **Performance analytics**: Pull campaign, ad group, ad, and audience metrics for common date ranges.
+- **Audience and account data**: Retrieve custom audiences, advertiser info, location IDs, pixels, and pixel event stats.
+- **Read-only operation**: The public MCP tool registry does not expose campaign creation, ad group creation, creative upload, or other write operations.
+
 
 ## Prerequisites
 
